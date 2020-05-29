@@ -9,11 +9,21 @@ namespace Asterix
     {
         static void Main(string[] args)
         {
-            WebClient webClient = new WebClient();
-            string originCommon = "https://www.omgbeaupeep.com/comics/mangas/Asterix/043%20-%20Asterix%20and%20the%20Chariot%20Race%20(2017)/read-asterix-and-the-chariot-race-comic-online-";
-            string destinationDirectory = @"D:\Matthieu\Comics\AstrixPages\AsterixAndTheChariotRace";
-            string destinationCommonFilePart = "Asterix43_Page";
 
+            if (args.Length < 3)
+            {
+                Console.WriteLine("Usage: Asterix <origin> <destinationDirectory> <destinationFileNameBase> ");
+                return;
+            }
+
+
+            string originCommon = args[0];
+            string destinationDirectory = args[1];
+            string destinationCommonFilePart = args[2];
+
+
+            WebClient webClient = new WebClient();
+           
             for (int pageNumber=0; pageNumber<100; pageNumber++)
             {
                 string origin = GetOriginFileName(originCommon, pageNumber);
