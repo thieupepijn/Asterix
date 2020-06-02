@@ -2,6 +2,8 @@
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Asterix
 {
@@ -10,67 +12,68 @@ namespace Asterix
         static void Main(string[] args)
         {
 
-            if (args.Length < 3)
+            if (args.Length != 2)
             {
-                Console.WriteLine("Usage: Asterix <origin> <destinationDirectory> <destinationFileNameBase> ");
+                Console.WriteLine("Usage: Asterix <lokationsfile> <destination> ");
                 return;
             }
 
+            string locationsFile = args[0];
+            List<string> locations = File.ReadLines(locationsFile).ToList();
 
-            string originCommon = args[0];
-            string destinationDirectory = args[1];
-            string destinationCommonFilePart = args[2];
-
+            string mainDestination = args[1];
+            int albumCounter = 1;
 
             WebClient webClient = new WebClient();
-           
-            for (int pageNumber=0; pageNumber<100; pageNumber++)
+
+            foreach (string location in locations)
             {
-                string origin = GetOriginFileName(originCommon, pageNumber);
-                string destination = GetDestinationFileName(destinationDirectory, destinationCommonFilePart, pageNumber);
+                string albumLocation = Path.Join(mainDestination, string.Format("Album{0}", albumCounter));
+                Directory.CreateDirectory(albumLocation);
 
-       
-                string message = string.Format("Downloading {0} to {1}", origin, destination);
-                Console.Write(message);
-
-                try
+                for (int pageNumber = 1; pageNumber < 100; pageNumber++)
                 {
-                    webClient.DownloadFile(origin, destination);
-                    Console.Write(" succes");
+                    string origin = string.Format("{0}{1}.jpg", location, FormatNumber(pageNumber));
+                    string destination = Destination(albumLocation, albumCounter, pageNumber);
+                    string message = string.Format("Downloading album {0} page {1} to {2}", albumCounter, pageNumber, destination);
+                    Console.Write(message);
+                    try
+                    {
+                        webClient.DownloadFile(origin, destination);
+                        Console.Write(" SUCCES");
+                    }
+                    catch
+                    {
+                        Console.Write(" FAILED");
+                    }
+                    Console.WriteLine();
                 }
-                catch(Exception exception)
-                {
-                    Console.Write(exception.Message);
-                }
-                Console.WriteLine(string.Empty);
-
+                albumCounter++;
             }
         }
 
-        private static string GetOriginFileName(string commonPart, int pageNumber)
+
+        private static string FormatNumber(int pageNumber)
         {
-            string pagePart = string.Empty;
             if (pageNumber < 10)
             {
-                pagePart = string.Format("00{0}", pageNumber);
+                return  string.Format("00{0}", pageNumber);
             }
             else if (pageNumber < 100)
             {
-                pagePart = string.Format("0{0}", pageNumber);
+                return string.Format("0{0}", pageNumber);
             }
             else
             {
-                pagePart = string.Format("{0}", pageNumber);
+                return string.Format("{0}", pageNumber);
             }
 
-            string imagefilename = string.Format("{0}{1}{2}", commonPart, pagePart, ".jpg");
-            return imagefilename;
         }
 
-        private static string GetDestinationFileName(string destinationDirectory, string destinationCommonFilePart, int pageNumber)
+        private static string Destination(string albumDirectory, int albumNumber, int pageNumber)
         {
-            string imageFileName = string.Format("{0}{1}{2}{3}.jpg", destinationDirectory, Path.DirectorySeparatorChar, destinationCommonFilePart, pageNumber);
-            return imageFileName;
+            string fileName = string.Format("Album{0}Page{1}.jpg", albumNumber, pageNumber);
+            return Path.Join(albumDirectory, fileName);
         }
 
     }
