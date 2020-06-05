@@ -72,7 +72,7 @@ namespace Asterix
 
         private static string Destination(string albumDirectory, int albumNumber, int pageNumber)
         {
-            string fileName = string.Format("Album{0}Page{1}.jpg", albumNumber, pageNumber);
+            string fileName = string.Format("Album{0}Page{1}.jpg", FormatNumber(albumNumber), FormatNumber(pageNumber));
             return Path.Join(albumDirectory, fileName);
         }
 
